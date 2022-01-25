@@ -1,25 +1,38 @@
 import { useEffect, useState } from 'react'
 import apiWrapper from '../config/api-wrapper'
 import config from '../config/env-config'
+import DataReport from './DataReport'
 
 const Dashboard = () => {
 
-    const [data, setData] = useState()
+    const [apiData, setApiData] = useState()
 
     useEffect(() => {
-        if (!data) {
+        if (!apiData) {
             apiWrapper.get(`${config.SERVER_URI}/frontend-test-data.json`)
                 .then(response => {
                     const { data } = response
-                    setData(data)
+                    setApiData(data)
                 })
         }
-    }, [data])
+    }, [apiData])
 
-    console.log(data)
+    console.log(apiData)
 
     return (
         <div>
+            <div>
+                <DataReport
+                    colConfig={apiData?.config1}
+                    data={apiData?.data}
+                />
+            </div>
+            <div>
+                <DataReport
+                    colConfig={apiData?.config2}
+                    data={apiData?.data}
+                />
+            </div>
         </div>
     )
 
