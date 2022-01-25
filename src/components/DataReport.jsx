@@ -1,14 +1,34 @@
 import { makeStyles } from "@mui/styles"
-
-const useStyles = makeStyles(() => ({
-    hidden: {
-        display: 'none',
-    }
-}))
+import { useEffect, useState } from "react"
 
 const DataReport = ({ colConfig, data }) => {
 
     const classes = useStyles()
+
+    const [dataRows, setDataRows] = useState()
+
+    useEffect(() => {
+        if (colConfig && data) {
+            const { query: { meta, headers, data: rows } } = data
+            const dataRows = rows.map((row, index) => {
+                const dataCol = row.map(col => {
+                    const config = colConfig.find(config => config.key === col.k)
+                    const header = headers.find(header => header.key === col.k)
+                    return {
+                        ...col,
+                        ...config,
+                        ...header,
+                    }
+                })
+                return {
+                    meta: meta[index],
+                    cols: [...dataCol]
+                }
+            })
+            console.log('dataRows', dataRows)
+            setDataRows(dataRows)
+        }
+    }, [colConfig, data])
 
     return (
         <div>
@@ -27,22 +47,18 @@ const DataReport = ({ colConfig, data }) => {
                         </tr>
                     </thead>
                     <tbody>
-                        {data.query.data.map((row, index) => {
-                            const meta = data.query.meta[index]
-                            return (
-                                <tr key={index}>
-                                    <td>{meta.title}</td>
-                                    {row.map(col => {
-                                        const config = colConfig.find(config => config.key === col.k)
-                                        return (
-                                            <td key={col.k} className={config && config.isHidden ? classes.hidden : ''}>
-                                                {col.v}
-                                            </td>
-                                        )
-                                    })}
-                                </tr>
-                            )
-                        })}
+                        {dataRows && dataRows.map((row, index) => (
+                            <tr key={index}>
+                                <td>{row.meta.title}</td>
+                                {row.cols.map(col => {
+                                    return (
+                                        <td key={col.k} className={col.isHidden ? classes.hidden : ''}>
+                                            {col.v}
+                                        </td>
+                                    )
+                                })}
+                            </tr>
+                        ))}
                     </tbody>
                 </table>
             )}
@@ -52,3 +68,9 @@ const DataReport = ({ colConfig, data }) => {
 }
 
 export default DataReport
+
+const useStyles = makeStyles(() => ({
+    hidden: {
+        display: 'none',
+    }
+}))
