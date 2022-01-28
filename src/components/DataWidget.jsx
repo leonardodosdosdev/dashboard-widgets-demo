@@ -5,7 +5,7 @@ import { getPlotValue } from "../helpers/plot-funcs"
 import DataRow from "./DataRow"
 import PlotHeader from "./PlotHeader"
 
-const DataReport = ({ colConfig, data }) => {
+const DataWidget = ({ colConfig, data }) => {
 
     const isLargeScreen = useMediaQuery('(min-width:1024px)')
 
@@ -106,7 +106,7 @@ const DataReport = ({ colConfig, data }) => {
     )
 }
 
-export default DataReport
+export default DataWidget
 
 const useStyles = makeStyles(() => ({
     flexRow: {

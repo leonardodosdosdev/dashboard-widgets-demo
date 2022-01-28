@@ -2,7 +2,7 @@ import { makeStyles } from '@mui/styles'
 import { useEffect, useState } from 'react'
 import apiWrapper from '../config/api-wrapper'
 import config from '../config/env-config'
-import DataReport from './DataReport'
+import DataWidget from './DataWidget'
 
 const Dashboard = () => {
 
@@ -23,13 +23,13 @@ const Dashboard = () => {
     return (
         <div className={classes.container}>
             <div className={classes.widget}>
-                <DataReport
+                <DataWidget
                     colConfig={apiData?.config1}
                     data={apiData?.data}
                 />
             </div>
             <div className={classes.widget}>
-                <DataReport
+                <DataWidget
                     colConfig={apiData?.config2}
                     data={apiData?.data}
                 />
