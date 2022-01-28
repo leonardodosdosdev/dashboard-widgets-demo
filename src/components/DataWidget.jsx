@@ -18,6 +18,7 @@ const DataWidget = ({ colConfig, data }) => {
         if (colConfig && data) {
             const { query: { meta, headers, data: rows } } = data
 
+            // retrieve plot values
             const plot = new Map()
             rows.forEach(row => {
                 row.forEach(col => {
@@ -32,6 +33,8 @@ const DataWidget = ({ colConfig, data }) => {
                     }
                 })
             })
+
+            // retrieve plot headers
             const headerTitles = headers.map(header => {
                 const config = colConfig.find(config => config.key === header.key)
                 return {
@@ -44,6 +47,7 @@ const DataWidget = ({ colConfig, data }) => {
             })
             setHeaderTitles(headerTitles)
 
+            // retrieve plot data
             const dataRows = rows.map((row, index) => {
                 const dataCol = row.map(col => {
                     const config = colConfig.find(config => config.key === col.k)
