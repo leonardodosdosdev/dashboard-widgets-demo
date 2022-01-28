@@ -17,7 +17,7 @@ const Dashboard = () => {
         }
     }, [apiData])
 
-    console.log(apiData)
+    // console.log(apiData)
 
     return (
         <div>
