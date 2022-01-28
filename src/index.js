@@ -5,10 +5,11 @@ import App from './App'
 import reportWebVitals from './reportWebVitals'
 import { CssBaseline } from '@mui/material'
 
+
 ReactDOM.render(
   <React.StrictMode>
-    <CssBaseline />
-    <App />
+      <CssBaseline />
+      <App />
   </React.StrictMode>,
   document.getElementById('root')
 )

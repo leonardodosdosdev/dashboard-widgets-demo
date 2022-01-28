@@ -1,16 +1,31 @@
-import { style } from "@mui/system"
-import { useEffect, useState } from "react"
+import { useMediaQuery } from "@mui/material"
+import { makeStyles } from "@mui/styles"
+import { Fragment, useEffect, useState } from "react"
 import Plot from "./Plot"
 
 const DataReport = ({ colConfig, data }) => {
 
-    const styles = useStyles()
+    const isLargeScreen = useMediaQuery('(min-width:600px)')
+
+    const classes = useStyles()
 
     const [dataRows, setDataRows] = useState()
+    const [headerTitles, setHeaderTitles] = useState()
 
     useEffect(() => {
         if (colConfig && data) {
             const { query: { meta, headers, data: rows } } = data
+
+            const headerTitles = headers.map(header => {
+                const config = colConfig.find(config => config.key === header.key)
+                return {
+                    ...header,
+                    isHidden: config && config.isHidden,
+                    isShowPlot: config && config.showPlot,
+                    isHideHeader: !config,
+                }
+            })
+            setHeaderTitles(headerTitles)
 
             const plot = new Map()
             rows.forEach(row => {
@@ -37,58 +52,57 @@ const DataReport = ({ colConfig, data }) => {
                     }
                     return {
                         ...col,
-                        plotValue,
                         ...config,
-                        ...header,
+                        plotValue,
+                        decimals: header.decimals,
+                        key: header.key,
+                        prefix: header.prefix,
+                        suffix: header.suffix,
                     }
                 })
-                return {
-                    meta: meta[index],
-                    cols: [...dataCol]
-                }
+                dataCol.push(meta[index])
+                return [...dataCol]
             })
             setDataRows(dataRows)
         }
     }, [colConfig, data])
 
-    console.log('dataRows', dataRows)
-
     return (
         <div>
-            {data && colConfig && (
-                <table style={styles.table}>
-                    <thead>
-                        <tr>
-                            {data.query.headers.map(header => {
-                                const config = colConfig.find(config => config.key === header.key)
-                                return (
-                                    <th key={header.key} style={config && config.isHidden ? styles.hidden : styles.header}>
-                                        <span style={!config ? styles.hidden : undefined}>{header.title}</span>
-                                    </th>
-                                )
-                            })}
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {dataRows && dataRows.map((row, index) => (
-                            <tr key={index}>
-                                <td style={styles.metaTitle}>{row.meta.title}</td>
-                                {row.cols.map(col => {
-                                    return (
-                                        <td key={col.k} style={col.isHidden ? styles.hidden : styles.col}>
-                                            <div style={styles.colDisplay}>
-                                                <div style={styles.colValue}>{col.suffix === '%' ? pFormat(col.v) : kFormat(col.v)}</div>
-                                                {col.showPlot && (
-                                                    <Plot plotValue={col.plotValue} />
-                                                )}
-                                            </div>
-                                        </td>
-                                    )
-                                })}
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
+            {data && colConfig && headerTitles && (
+                <div className={isLargeScreen ? classes.flexRow : classes.flexCol}>
+                    {headerTitles.map(header => {
+                        return (
+                            <Fragment key={header.key}>
+                                {!header.isHidden && (
+                                    <div className={`${classes.box} ${header.isShowPlot && classes.flexBox}`}>
+                                        <div className={classes.header}>{header.isHideHeader ? '' : header.title}</div>
+                                        {dataRows.map((rows, index) => {
+                                            const row = rows.find(row => row.key === header.key)
+                                            return (
+                                                <Fragment key={index}>
+                                                    {!row.isHidden && (
+                                                        <div className={classes.cell}>
+                                                            {row.title && <div>{row.title}</div>}
+                                                            {row.v && (
+                                                                <div className={classes.colDisplay}>
+                                                                    <div className={classes.colValue}>{row.suffix === '%' ? pFormat(row.v) : kFormat(row.v)}</div>
+                                                                    {row.showPlot && (
+                                                                        <Plot plotValue={row.plotValue} />
+                                                                    )}
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    )}
+                                                </Fragment>
+                                            )
+                                        })}
+                                    </div>
+                                )}
+                            </Fragment>
+                        )
+                    })}
+                </div>
             )}
         </div>
     )
@@ -111,15 +125,26 @@ const pFormat = num => {
     return num.toFixed(1) + '%'
 }
 
-const useStyles = () => ({
-    hidden: {
-        display: 'none',
+const useStyles = makeStyles(() => ({
+    flexRow: {
+        display: 'flex',
+        flexDirection: 'row',
     },
-    table: {
-        width: '100%',
+    flexCol: {
+        display: 'flex',
+        flexDirection: 'column',
+    },
+    box: {
+        minWidth: '220px',
+    },
+    flexBox: {
+        flex: 1,
     },
     header: {
         textAlign: 'left',
+        minHeight: '28px',
+        fontWeight: 'bold',
+        padding: '0 0 8px 0',
     },
     colValue: {
         minWidth: '70px',
@@ -130,13 +155,7 @@ const useStyles = () => ({
         display: 'flex',
         flexDirection: 'row',
     },
-    metaTitle: {
-        width: '19%',
-        // width: '200px',
-        minWidth: '200px',
+    cell: {
+        minHeight: '30px',
     },
-    col: {
-        width: '27%',
-        // width: '100px',
-    }
-})
+}))
