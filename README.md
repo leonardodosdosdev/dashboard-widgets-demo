@@ -6,6 +6,10 @@ This is a demo widget app that displays tabular browser data.
 
 In the project directory, you can run:
 
+### `npm i`
+
+Installs all the dependencies for this project
+
 ### `npm start`
 
 Runs the app in the development mode.\
