@@ -1,6 +1,7 @@
 import { useMediaQuery } from "@mui/material"
 import { makeStyles } from "@mui/styles"
 import { Fragment, useEffect, useState } from "react"
+import { getPlotValue, kFormat, pFormat } from "../helpers/plot-funcs"
 import Plot from "./Plot"
 
 const DataReport = ({ colConfig, data }) => {
@@ -11,6 +12,8 @@ const DataReport = ({ colConfig, data }) => {
 
     const [dataRows, setDataRows] = useState()
     const [headerTitles, setHeaderTitles] = useState()
+
+    console.log(`data`, data)
 
     useEffect(() => {
         if (colConfig && data) {
@@ -86,7 +89,7 @@ const DataReport = ({ colConfig, data }) => {
                                                             {row.title && <div>{row.title}</div>}
                                                             {row.v && (
                                                                 <div className={classes.colDisplay}>
-                                                                    <div className={classes.colValue}>{row.suffix === '%' ? pFormat(row.v) : kFormat(row.v)}</div>
+                                                                    <div className={classes.colValue}>{row.suffix === '%' ? pFormat(row.v, row.decimals) : kFormat(row.v, row.decimals)}</div>
                                                                     {row.showPlot && (
                                                                         <Plot plotValue={row.plotValue} />
                                                                     )}
@@ -110,21 +113,6 @@ const DataReport = ({ colConfig, data }) => {
 
 export default DataReport
 
-const getPlotValue = (arr, v) => {
-    arr.sort((a, b) => a - b)
-    const first = arr[0]
-    const last = arr[arr.length - 1]
-    return (v - first) / (last - first)
-}
-
-const kFormat = num => {
-    return Math.abs(num) > 999 ? Math.sign(num) * ((Math.abs(num) / 1000).toFixed(1)) + 'k' : Math.sign(num) * Math.abs(num)
-}
-
-const pFormat = num => {
-    return num.toFixed(1) + '%'
-}
-
 const useStyles = makeStyles(() => ({
     flexRow: {
         display: 'flex',
@@ -142,9 +130,8 @@ const useStyles = makeStyles(() => ({
     },
     header: {
         textAlign: 'left',
-        minHeight: '28px',
+        minHeight: '32px',
         fontWeight: 'bold',
-        padding: '0 0 8px 0',
     },
     colValue: {
         minWidth: '70px',
