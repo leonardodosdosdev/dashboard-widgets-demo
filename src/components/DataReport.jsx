@@ -3,32 +3,20 @@ import { makeStyles } from "@mui/styles"
 import { Fragment, useEffect, useState } from "react"
 import { getPlotValue, kFormat, pFormat } from "../helpers/plot-funcs"
 import Plot from "./Plot"
+import PlotHeader from "./PlotHeader"
 
 const DataReport = ({ colConfig, data }) => {
 
-    const isLargeScreen = useMediaQuery('(min-width:600px)')
+    const isLargeScreen = useMediaQuery('(min-width:1024px)')
 
     const classes = useStyles()
 
     const [dataRows, setDataRows] = useState()
     const [headerTitles, setHeaderTitles] = useState()
 
-    console.log(`data`, data)
-
     useEffect(() => {
         if (colConfig && data) {
             const { query: { meta, headers, data: rows } } = data
-
-            const headerTitles = headers.map(header => {
-                const config = colConfig.find(config => config.key === header.key)
-                return {
-                    ...header,
-                    isHidden: config && config.isHidden,
-                    isShowPlot: config && config.showPlot,
-                    isHideHeader: !config,
-                }
-            })
-            setHeaderTitles(headerTitles)
 
             const plot = new Map()
             rows.forEach(row => {
@@ -44,6 +32,18 @@ const DataReport = ({ colConfig, data }) => {
                     }
                 })
             })
+            const headerTitles = headers.map(header => {
+                const config = colConfig.find(config => config.key === header.key)
+                return {
+                    ...header,
+                    isHidden: config && config.isHidden,
+                    isShowPlot: config && config.showPlot,
+                    isHideHeader: !config,
+                    plot: plot.get(header.key),
+                }
+            })
+            setHeaderTitles(headerTitles)
+
             const dataRows = rows.map((row, index) => {
                 const dataCol = row.map(col => {
                     const config = colConfig.find(config => config.key === col.k)
@@ -79,7 +79,16 @@ const DataReport = ({ colConfig, data }) => {
                             <Fragment key={header.key}>
                                 {!header.isHidden && (
                                     <div className={`${classes.box} ${header.isShowPlot && classes.flexBox}`}>
-                                        <div className={classes.header}>{header.isHideHeader ? '' : header.title}</div>
+                                        <div className={classes.header}>
+                                            {!header.isHideHeader && (
+                                                <>
+                                                    <div>{header.title}</div>
+                                                    {header.plot && (
+                                                        <PlotHeader plot={header.plot} suffix={header.suffix} />
+                                                    )}
+                                                </>
+                                            )}
+                                        </div>
                                         {dataRows.map((rows, index) => {
                                             const row = rows.find(row => row.key === header.key)
                                             return (
@@ -130,7 +139,7 @@ const useStyles = makeStyles(() => ({
     },
     header: {
         textAlign: 'left',
-        minHeight: '32px',
+        minHeight: '45px',
         fontWeight: 'bold',
     },
     colValue: {
